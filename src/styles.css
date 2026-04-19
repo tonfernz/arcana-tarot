@@ -900,8 +900,6 @@ body {
   gap: 16px;
   justify-content: center;
   padding: 8px 12px;
-  border-top: 1px dashed var(--line);
-  border-bottom: 1px dashed var(--line);
   width: 100%;
 }
 .tap-deck-slot {
@@ -997,6 +995,7 @@ body {
   align-items: center;
   justify-content: center;
   padding: 28px;
+  touch-action: none;
   animation: scrim-in 0.3s;
 }
 @keyframes scrim-in { from { opacity: 0; } }
@@ -1009,6 +1008,9 @@ body {
   max-width: 1080px;
   max-height: 92vh;
   overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
   position: relative;
   box-shadow: 0 20px 60px rgba(0,0,0,0.4);
   animation: detail-in 0.4s cubic-bezier(0.2, 0.8, 0.3, 1);
@@ -1436,4 +1438,16 @@ body {
     width: calc(var(--card-w) * 1.2);
     height: calc(var(--card-h) * 1.0);
   }
+  /* Detail view mobile fixes */
+  .detail-scrim { padding: 0; align-items: flex-end; }
+  .detail {
+    max-height: 96vh;
+    border-radius: 12px 12px 0 0;
+  }
+  .detail-text-col { padding: 20px 16px; }
+  .detail-card-col { padding: 24px 16px; }
+  .detail-body-text { font-size: 16px; }
+  .detail-name-text { font-size: 26px; }
+  .detail-all { grid-template-columns: 1fr; }
+  .detail-close-fixed { top: 12px; right: 12px; }
 }
