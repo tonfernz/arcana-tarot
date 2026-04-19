@@ -104,6 +104,8 @@ const UI = {
     ],
     tapReveal: "tap to reveal",
     tapMeaning: "tap for meaning →",
+    tapCardHint: "Tap a card to view its meaning",
+    drawSteps: ["1. Draw your first card", "2. Draw your second card", "3. Draw your final card"],
     readingFooter: "Tap any card to read its meaning across career, finance, love & health.",
     keywords: "KEYWORDS",
     tabs: [
@@ -150,6 +152,8 @@ const UI = {
     ],
     tapReveal: "แตะเพื่อเปิดไพ่",
     tapMeaning: "แตะเพื่ออ่านความหมาย →",
+    tapCardHint: "แตะที่ไพ่เพื่อดูความหมาย",
+    drawSteps: ["1. เปิดไพ่ใบแรกของคุณ", "2. เปิดไพ่ใบที่สองของคุณ", "3. เปิดไพ่ใบสุดท้ายของคุณ"],
     readingFooter: "แตะที่ไพ่ใบใดก็ได้เพื่ออ่านความหมายด้านการงาน การเงิน ความรัก และสุขภาพ",
     keywords: "คำสำคัญ",
     tabs: [
@@ -396,7 +400,7 @@ function Fan({ deck, drawn, onDraw, t }) {
       <div className="tap-deck-header">
         <span className="tap-deck-count">{drawn.length} / 3</span>
         <span className="tap-deck-instruct-top">
-          {[t.drawInstruct0, t.drawInstruct1, t.drawInstruct2, t.drawInstruct3][drawn.length]}
+          {drawn.length < 3 ? t.drawSteps[drawn.length] : t.drawInstruct3}
         </span>
       </div>
 
@@ -456,13 +460,12 @@ function Reading({ cards, flipped, onFlip, onDetail, animation, positions, t }) 
                 <div className="reading-slot-face reading-slot-back"><CardBack /></div>
                 <div className="reading-slot-face reading-slot-front"><CardFace card={cards[i]} /></div>
               </div>
-              <div className={`reading-slot-hint ${flipped[i] ? "reading-slot-hint-detail" : ""}`}>
-                {flipped[i] ? t.tapMeaning : t.tapReveal}
-              </div>
             </div>
           </div>
         ))}
       </div>
+
+      <div className="reading-tap-hint">{t.tapCardHint}</div>
 
       {flipped.every(Boolean) && (
         <div className="reading-footer">

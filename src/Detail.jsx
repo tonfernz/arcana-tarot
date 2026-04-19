@@ -19,7 +19,7 @@ function DetailView({ card, position, onClose, lang, t }) {
   return (
     <div className="detail-scrim" onClick={onClose}>
       <div className="detail" onClick={(e) => e.stopPropagation()}>
-        <button className="detail-close" onClick={onClose} aria-label="Close">
+        <button className="detail-close detail-close-fixed" onClick={onClose} aria-label="Close">
           <span>×</span>
         </button>
 
