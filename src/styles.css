@@ -52,10 +52,25 @@
   --card-radius: 8px;
 }
 
-/* Thai language — override body/display fonts so Thai glyphs render correctly */
+/* Thai language — override all fonts and kill letter-spacing/uppercase */
 .app.lang-th {
   --f-body:    'NotoSansThai', sans-serif;
   --f-display: 'NotoSansThai', sans-serif;
+  --f-mono:    'NotoSansThai', sans-serif;
+}
+.app.lang-th .fan-instruction-text,
+.app.lang-th .reading-position-sub,
+.app.lang-th .reading-slot-hint,
+.app.lang-th .tap-deck-instruct-top,
+.app.lang-th .tap-deck-hint,
+.app.lang-th .fan-input-label,
+.app.lang-th .app-footer,
+.app.lang-th .fan-hint,
+.app.lang-th .intro-cta,
+.app.lang-th .app-restart,
+.app.lang-th .shuffling-label {
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 * { box-sizing: border-box; }
@@ -835,6 +850,121 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════
+   TAP DECK — mobile-first draw interaction
+   ═══════════════════════════════════════════════════════ */
+.tap-deck-wrap {
+  width: 100%;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 0 24px;
+}
+.tap-deck-header {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  width: 100%;
+  justify-content: center;
+}
+.tap-deck-count {
+  font-family: var(--f-display);
+  font-size: 28px;
+  font-style: italic;
+  color: var(--accent);
+  line-height: 1;
+}
+.tap-deck-instruct-top {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+.tap-deck-slots {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  padding: 8px 12px;
+  border-top: 1px dashed var(--line);
+  border-bottom: 1px dashed var(--line);
+  width: 100%;
+}
+.tap-deck-slot {
+  width: calc(var(--card-w) * 0.62);
+  height: calc(var(--card-h) * 0.62);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tap-deck-slot-n {
+  position: absolute;
+  top: -22px;
+  font-family: var(--f-display);
+  font-style: italic;
+  font-size: 14px;
+  color: var(--accent);
+}
+.tap-deck-slot-empty {
+  width: 100%;
+  height: 100%;
+  border: 1.5px dashed var(--line);
+  border-radius: var(--card-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-soft);
+  font-size: 20px;
+}
+.tap-deck-slot-card {
+  width: 100%;
+  height: 100%;
+}
+/* Stack of cards */
+.tap-deck-stack {
+  position: relative;
+  width: calc(var(--card-w) * 1.1);
+  height: calc(var(--card-h) * 1.1);
+  cursor: pointer;
+  margin: 12px 0 4px;
+  flex-shrink: 0;
+}
+.tap-deck-stack.done {
+  opacity: 0.4;
+  cursor: default;
+  pointer-events: none;
+}
+.tap-deck-card {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: var(--card-w);
+  height: var(--card-h);
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+/* Top card lifts on hover */
+.tap-deck-stack:not(.done):hover .tap-deck-card:last-child {
+  transform: translateX(calc(-50% + 5px)) translateY(-18px) rotate(2.5deg) !important;
+}
+.tap-deck-stack:not(.done):active .tap-deck-card:last-child {
+  transform: translateX(calc(-50% + 5px)) translateY(-8px) rotate(1.5deg) scale(0.97) !important;
+}
+.tap-deck-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  text-align: center;
+}
+.tap-deck-star { color: var(--accent); }
+
+/* ═══════════════════════════════════════════════════════
    DETAIL VIEW
    ═══════════════════════════════════════════════════════ */
 .detail-scrim {
@@ -1240,23 +1370,40 @@ body {
 
 @media (max-width: 600px) {
   :root {
-    --card-w: 95px;
-    --card-h: 152px;
+    --card-w: 100px;
+    --card-h: 160px;
   }
+  .app { padding: 12px 12px; }
+  /* Reading spread: horizontal row, no stacking */
   .reading-spread {
-    flex-direction: column;
-    align-items: center;
-    gap: 32px;
-    padding-bottom: 40px;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 10px;
+    padding: 16px 4px 40px;
   }
   .reading-position-col:nth-child(1),
   .reading-position-col:nth-child(2),
   .reading-position-col:nth-child(3) { margin-top: 0; }
+  .reading-position-col:not(:last-child)::after { display: none; }
+  /* All cards same size on mobile */
   .reading-slot-center {
     width: var(--card-w);
     height: var(--card-h);
   }
-  .card-face-glyph { font-size: 56px; }
-  .fan-instruction { margin-bottom: 30px; }
-  .fan-instruction-count { font-size: 28px; }
+  .reading-position-title { font-size: 16px; }
+  .reading-col-center .reading-position-title { font-size: 16px; color: var(--accent); }
+  .reading-position-sub { font-size: 9px; }
+  .reading-position-header { margin-bottom: 10px; }
+  /* Tap-deck adjustments */
+  .tap-deck-slots { gap: 10px; }
+  .tap-deck-slot {
+    width: calc(var(--card-w) * 0.7);
+    height: calc(var(--card-h) * 0.7);
+  }
+  .tap-deck-stack {
+    width: calc(var(--card-w) * 1.2);
+    height: calc(var(--card-h) * 1.0);
+  }
 }

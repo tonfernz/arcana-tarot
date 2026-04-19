@@ -89,10 +89,11 @@ const UI = {
     introCards: "cards",
     introPositions: "positions",
     shufflingLabel: "SHUFFLING · hold your question",
-    drawInstruct0: "Drag three cards from the deck",
-    drawInstruct1: "Two more to draw",
-    drawInstruct2: "One more to draw",
+    drawInstruct0: "Tap the deck to draw a card",
+    drawInstruct1: "Two more — tap again",
+    drawInstruct2: "One more — tap again",
     drawInstruct3: "Revealing…",
+    tapDeckInstruct: "Make a wish and tap the deck",
     drawByNumber: "or draw by number",
     drawBtn: "draw",
     fanHint: "Tap & drag a card up, or type its position number",
@@ -121,23 +122,24 @@ const UI = {
     newReading: "เริ่มใหม่",
     footer1: "ไพ่ LXXVIII ใบ · สามตำแหน่ง · หนึ่งการทำนาย",
     footer2: "อดีต / ปัจจุบัน / อนาคต",
-    introTitle1: "สามใบไพ่",
+    introTitle1: "เปิดไพ่สามใบ",
     introTitle2: "สำหรับคำถาม",
-    introTitle3: "ที่คุณกำลังแบกรับ",
-    introBody: "ตั้งจิตใจกับคำถามของคุณ — สิ่งที่แท้จริง สิ่งที่ยังไม่ได้รับการคลี่คลาย เมื่อพร้อมแล้ว สับไพ่และหยิบสามใบ ใบแรกบอกถึง",
-    introBodySit: "อดีต",
-    introBodyMid: " ใบที่สองบอกถึง",
-    introBodyAct: "ปัจจุบัน",
-    introBodyEnd: " ใบที่สามบอกถึง",
-    introBodyOut: "อนาคต",
+    introTitle3: "ที่คุณต้องการคำตอบ",
+    introBody: "ตั้งจิตให้มั่นต่อคำถามอย่างสัตย์จริง หยิบไพ่สามใบ ใบแรกบอกถึง อดีต ใบที่สองบอกถึง ปัจจุบัน และใบที่สามบอกถึงอนาคต",
+    introBodySit: "",
+    introBodyMid: "",
+    introBodyAct: "",
+    introBodyEnd: "",
+    introBodyOut: "",
     introCta: "สับไพ่",
     introCards: "ใบ",
     introPositions: "ตำแหน่ง",
     shufflingLabel: "กำลังสับไพ่ · ตั้งจิตกับคำถามของคุณ",
-    drawInstruct0: "ลากไพ่สามใบจากกองไพ่",
-    drawInstruct1: "เหลืออีกสองใบ",
-    drawInstruct2: "เหลืออีกหนึ่งใบ",
+    drawInstruct0: "แตะกองไพ่เพื่อหยิบไพ่",
+    drawInstruct1: "อีกสองใบ — แตะอีกครั้ง",
+    drawInstruct2: "อีกหนึ่งใบ — แตะอีกครั้ง",
     drawInstruct3: "กำลังเปิดเผย…",
+    tapDeckInstruct: "อธิษฐานแล้วแตะที่กองไพ่",
     drawByNumber: "หรือหยิบตามหมายเลข",
     drawBtn: "หยิบ",
     fanHint: "แตะและลากไพ่ขึ้น หรือพิมพ์หมายเลขตำแหน่ง",
@@ -263,7 +265,7 @@ function App() {
         </div>
       </header>
 
-      <main className={`app-main${stage === "fan" ? " app-main--fan" : ""}`}>
+      <main className="app-main">
         {stage === "intro"     && <Intro onStart={startShuffle} t={t} />}
         {stage === "shuffling" && <Shuffling t={t} />}
         {stage === "fan"       && (
@@ -364,188 +366,74 @@ function Shuffling({ t }) {
   );
 }
 
-// ───── Stage: fan
+// ───── Stage: fan — replaced with tap-deck for mobile-first UX
 function Fan({ deck, drawn, onDraw, t }) {
   const n = deck.length;
   const drawnSet = new Set(drawn);
-  const remaining = n - drawn.length;
+  const done = drawn.length >= 3;
 
-  const [dragIdx, setDragIdx] = useAppState(null);
-  const [dragPt, setDragPt] = useAppState({ x: 0, y: 0 });
-  const [grabOffset, setGrabOffset] = useAppState({ x: 0, y: 0 });
-  const [dragStart, setDragStart] = useAppState({ x: 0, y: 0 });
-  const [dragged, setDragged] = useAppState(false);
-  const [inputVal, setInputVal] = useAppState("");
-  const [inputErr, setInputErr] = useAppState(false);
-  const fanRef = useAppRef(null);
-  const slotRef = useAppRef(null);
-
-  function onPointerDown(e, i) {
-    if (drawnSet.has(i) || drawn.length >= 3) return;
-    e.preventDefault();
-    const pt = getPt(e);
-    const rect = e.currentTarget.getBoundingClientRect();
-    setDragIdx(i);
-    setDragStart({ x: pt.x, y: pt.y });
-    setDragPt({ x: pt.x, y: pt.y });
-    setGrabOffset({ x: pt.x - (rect.left + rect.width / 2), y: pt.y - (rect.top + rect.height / 2) });
-    setDragged(false);
-    try { e.currentTarget.setPointerCapture?.(e.pointerId); } catch {}
-  }
-
-  function onPointerMove(e) {
-    if (dragIdx === null) return;
-    const pt = getPt(e);
-    setDragPt({ x: pt.x, y: pt.y });
-    if (Math.hypot(pt.x - dragStart.x, pt.y - dragStart.y) > 6) setDragged(true);
-  }
-
-  function onPointerUp(e) {
-    if (dragIdx === null) return;
-    const pt = getPt(e);
-    const dx = pt.x - dragStart.x, dy = pt.y - dragStart.y;
-    const slot = slotRef.current?.getBoundingClientRect();
-    const onSlot = slot && pt.x >= slot.left && pt.x <= slot.right && pt.y >= slot.top && pt.y <= slot.bottom;
-    if (onSlot || dy < -80 || Math.hypot(dx, dy) > 100 || !dragged) onDraw(dragIdx);
-    setDragIdx(null);
-    setDragged(false);
-  }
-
-  useAppEffect(() => {
-    if (dragIdx === null) return;
-    const mv = (e) => onPointerMove(e);
-    const up = (e) => onPointerUp(e);
-    window.addEventListener("pointermove", mv);
-    window.addEventListener("pointerup", up);
-    window.addEventListener("pointercancel", up);
-    return () => {
-      window.removeEventListener("pointermove", mv);
-      window.removeEventListener("pointerup", up);
-      window.removeEventListener("pointercancel", up);
-    };
-  }, [dragIdx, dragStart.x, dragStart.y]);
-
-  function getPt(e) {
-    if (e.touches && e.touches[0]) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
-    return { x: e.clientX, y: e.clientY };
-  }
-
-  function submitIndex(e) {
-    e.preventDefault();
-    const num = parseInt(inputVal.trim(), 10);
-    if (!Number.isFinite(num) || num < 1 || num > remaining) {
-      setInputErr(true);
-      setTimeout(() => setInputErr(false), 600);
-      return;
+  function tapDraw() {
+    if (done) return;
+    const available = [];
+    for (let i = 0; i < n; i++) {
+      if (!drawnSet.has(i)) available.push(i);
     }
-    let count = 0, target = -1;
-    for (let i = 0; i < deck.length; i++) {
-      if (drawnSet.has(i)) continue;
-      if (++count === num) { target = i; break; }
-    }
-    if (target >= 0) { onDraw(target); setInputVal(""); }
+    const pick = available[Math.floor(Math.random() * available.length)];
+    onDraw(pick);
   }
 
-  const instructText = [t.drawInstruct0, t.drawInstruct1, t.drawInstruct2, t.drawInstruct3][drawn.length];
+  const stackOffsets = [
+    { x: -5, y: 10, r: -2.5 },
+    { x: -2, y:  7, r: -1.2 },
+    { x:  0, y:  4, r:  0   },
+    { x:  3, y:  2, r:  1.2 },
+    { x:  5, y:  0, r:  2.5 },
+  ];
 
   return (
-    <div className="fan-wrap">
-      <div className="fan-toolbar">
-        <div className="fan-instruction">
-          <span className="fan-instruction-count">{drawn.length} / 3</span>
-          <span className="fan-instruction-text">{instructText}</span>
-        </div>
+    <div className="tap-deck-wrap">
 
-        <form className={`fan-input ${inputErr ? "err" : ""}`} onSubmit={submitIndex}>
-          <label className="fan-input-label">{t.drawByNumber}</label>
-          <div className="fan-input-row">
-            <input
-              type="number" min="1" max={remaining}
-              value={inputVal}
-              onChange={(e) => setInputVal(e.target.value)}
-              placeholder="##"
-              disabled={drawn.length >= 3}
-              className="fan-input-field"
-              inputMode="numeric"
-            />
-            <span className="fan-input-slash">/</span>
-            <span className="fan-input-max">{String(remaining).padStart(2, "0")}</span>
-            <button type="submit" className="fan-input-btn" disabled={drawn.length >= 3 || !inputVal}>
-              {t.drawBtn}
-            </button>
-          </div>
-        </form>
+      <div className="tap-deck-header">
+        <span className="tap-deck-count">{drawn.length} / 3</span>
+        <span className="tap-deck-instruct-top">
+          {[t.drawInstruct0, t.drawInstruct1, t.drawInstruct2, t.drawInstruct3][drawn.length]}
+        </span>
       </div>
 
-      <div className="fan-slot-row" ref={slotRef}>
-        {[0,1,2].map((i) => {
+      <div className="tap-deck-slots">
+        {[0,1,2].map(i => {
           const card = drawn[i] !== undefined ? deck[drawn[i]] : null;
           return (
-            <div key={i} className={`fan-slot ${card ? "filled" : ""}`}>
-              <div className="fan-slot-n">{["I","II","III"][i]}</div>
-              {card ? (
-                <div className="fan-slot-card"><CardBack /></div>
-              ) : (
-                <div className="fan-slot-empty"><span className="fan-slot-dash">—</span></div>
-              )}
+            <div key={i} className={`tap-deck-slot ${card ? "filled" : ""}`}>
+              <div className="tap-deck-slot-n">{["I","II","III"][i]}</div>
+              {card
+                ? <div className="tap-deck-slot-card"><CardBack /></div>
+                : <div className="tap-deck-slot-empty"><span className="tap-deck-slot-dash">—</span></div>
+              }
             </div>
           );
         })}
       </div>
 
-      <div className="fan" ref={fanRef} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerUp}>
-        {deck.map((c, i) => {
-          const mid = (n - 1) / 2;
-          const t_ = (i - mid) / mid;
-          const angle = t_ * 36;
-          const radius = 900;
-          const xShift = Math.sin(angle * Math.PI / 180) * radius * 0.02;
-          const lift   = (1 - Math.cos(angle * Math.PI / 180)) * radius * 0.02;
-          const isDrawn = drawnSet.has(i);
-          const isDragging = dragIdx === i;
-
-          if (isDragging) {
-            return (
-              <div key={i} className="fan-card fan-card-placeholder"
-                style={{ transform: `translate(-50%, -50%) rotate(${angle}deg) translateY(${lift}px) translateX(${xShift}px)`, zIndex: i }} />
-            );
-          }
-
-          return (
-            <div key={i}
-              className={`fan-card ${isDrawn ? "drawn" : ""}`}
-              onPointerDown={(e) => onPointerDown(e, i)}
-              style={{
-                transform: isDrawn
-                  ? `translate(-50%, -280%) rotate(0deg) scale(0.7)`
-                  : `translate(-50%, -50%) rotate(${angle}deg) translateY(${lift}px) translateX(${xShift}px)`,
-                zIndex: isDrawn ? 0 : i,
-                pointerEvents: isDrawn ? "none" : (drawn.length >= 3 ? "none" : "auto"),
-              }}
-            >
-              <CardBack />
-              <div className="fan-card-idx">{String(i + 1).padStart(2, "0")}</div>
-            </div>
-          );
-        })}
+      <div className={`tap-deck-stack${done ? " done" : ""}`} onClick={tapDraw}>
+        {stackOffsets.map((off, i) => (
+          <div key={i} className="tap-deck-card" style={{
+            transform: `translateX(calc(-50% + ${off.x}px)) translateY(${off.y}px) rotate(${off.r}deg)`,
+            zIndex: i + 1
+          }}>
+            <CardBack />
+          </div>
+        ))}
       </div>
 
-      {dragIdx !== null && (
-        <div className="fan-card-floater"
-          style={{ left: `${dragPt.x - grabOffset.x}px`, top: `${dragPt.y - grabOffset.y}px` }}
-          onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerUp}
-        >
-          <CardBack />
-        </div>
-      )}
-
-      <div className="fan-hint">
-        <span>✱</span>
-        <span>{t.fanHint}</span>
+      <div className="tap-deck-hint">
+        <span className="tap-deck-star">✱</span>
+        <span>{done ? t.drawInstruct3 : t.tapDeckInstruct}</span>
       </div>
     </div>
   );
 }
+
 
 // ───── Stage: reading — improved spread layout
 function Reading({ cards, flipped, onFlip, onDetail, animation, positions, t }) {
