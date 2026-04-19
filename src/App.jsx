@@ -412,7 +412,7 @@ function Fan({ deck, drawn, onDraw, t }) {
               <div className="tap-deck-slot-n">{["I","II","III"][i]}</div>
               {card
                 ? <div className="tap-deck-slot-card"><CardBack /></div>
-                : <div className="tap-deck-slot-empty"><span className="tap-deck-slot-dash">—</span></div>
+                : <div className="tap-deck-slot-empty"></div>
               }
             </div>
           );

@@ -1065,6 +1065,8 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  min-width: 0;
+  overflow: hidden;
 }
 .detail-position-label {
   font-family: var(--f-mono);
@@ -1129,6 +1131,8 @@ body {
   padding: 44px 48px;
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
 }
 .detail-name {
   display: flex;
@@ -1150,6 +1154,9 @@ body {
   font-weight: 500;
   color: var(--ink);
   line-height: 1.05;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  min-width: 0;
 }
 .detail-tabs {
   display: flex;
@@ -1447,7 +1454,13 @@ body {
   .detail-text-col { padding: 20px 16px; }
   .detail-card-col { padding: 24px 16px; }
   .detail-body-text { font-size: 16px; }
-  .detail-name-text { font-size: 26px; }
+  .detail-name-text { font-size: 24px; }
+  .detail-name { gap: 8px; margin-bottom: 16px; padding-bottom: 14px; }
   .detail-all { grid-template-columns: 1fr; }
   .detail-close-fixed { top: 12px; right: 12px; }
+  /* Hide the decorative floated § on mobile — it breaks text flow */
+  .detail-body-mark { display: none; }
+  /* Ensure preview boxes clip properly */
+  .detail-all-item { overflow: hidden; }
+  .detail-all-preview { overflow: hidden; }
 }
