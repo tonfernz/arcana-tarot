@@ -66,19 +66,6 @@ function DetailView({ card, position, onClose, lang, t }) {
             <div className="detail-body">
               <div className="detail-body-mark">§</div>
               <p className="detail-body-text">{getText(tab)}</p>
-
-              <div className="detail-all">
-                {tabs.map((tb) => (
-                  <div
-                    key={tb.key}
-                    className={`detail-all-item ${tab === tb.key ? "active" : ""}`}
-                    onClick={() => setTab(tb.key)}
-                  >
-                    <div className="detail-all-label">{tb.label}</div>
-                    <div className="detail-all-preview">{getText(tb.key)}</div>
-                  </div>
-                ))}
-              </div>
             </div>
           </div>
         </div>
